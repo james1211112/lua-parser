@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -6,12 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="Tests/**/*.cs" />
-    <Compile Remove="Parser/Tests/**/*.cs" />
-</ItemGroup>
+
   <ItemGroup>
     <Compile Remove="Tests/**/*.cs" />
     <Compile Remove="Playground/**/*.cs" />
-</ItemGroup>
+  </ItemGroup>
+
 </Project>
