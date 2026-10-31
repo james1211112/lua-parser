@@ -56,7 +56,7 @@ public partial class Lexer
                 tokens.Add(Number(input, ref i));
                 continue;
             }
-            if (c == '"')
+            if (c == '"' || c == '\'')
             {
                 tokens.Add(String(input, ref i));
                 continue;
@@ -74,6 +74,7 @@ public partial class Lexer
                 i++;
                 continue;
             }
+            throw new Exception($"unexpected character: {c}");
         }
         return tokens;
     }
