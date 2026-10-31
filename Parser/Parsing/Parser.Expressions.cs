@@ -28,11 +28,11 @@ public partial class Parser
     {
         ExprNode left = ParseValue();
 
-        if (Peek()?.Type == Lexer.TokenType.Operator)
+        while (Peek()?.Type == Lexer.TokenType.Operator) // support more than one operator
         {
             Token op = Advance();
             ExprNode right = ParseValue();
-            return new BinaryExpressionNode(left, op.Value, right);
+            left = new BinaryExpressionNode(left, op.Value, right);
         }
 
         return left;
