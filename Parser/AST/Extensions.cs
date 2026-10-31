@@ -7,8 +7,7 @@ public static class Extensions
     {
         return node switch
         {
-            LocalDeclaration l =>
-    $"local {string.Join(", ", l.Names.Select(n => n.ToFullString()))} = {string.Join(", ", l.Values.Select(v => v.ToFullString()))}", // support multiple local variable declarations 
+            LocalDeclaration l =>$"local {string.Join(", ", l.Names.Select(n => n.ToFullString()))}" + (l.Values.Count > 0 ? $" = {string.Join(", ", l.Values.Select(v => v.ToFullString()))}" : ""),  
             IdentifierNode id => id.Name,
             ConstantNode c => c.Kind switch
             {

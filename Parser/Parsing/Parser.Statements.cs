@@ -5,7 +5,7 @@ namespace Parser;
 using Token = global::Parser.Lexer.Token;
 public partial class Parser
 {
-    private ExprNode ParseStatement() // TODO: global variable support
+    private ExprNode ParseStatement() 
     {
         Token token = Peek()!; // using new helper now
         if (token.Type == Lexer.TokenType.Keyword)
@@ -31,16 +31,21 @@ public partial class Parser
             throw new Exception("Incomplete variable declaration");
 
         List<IdentifierNode> names = ParseList(ParseIdentifier);
+        List<ExprNode> values = new List<ExprNode>();
 
-        if (pos >= tokens.Count)
-            throw new Exception("Incomplete variable declaration");
+        // if (pos >= tokens.Count)
+        //     throw new Exception("Incomplete variable declaration");
 
-        Expect(Lexer.TokenType.Equals, "Expected '='");
+        // Expect(Lexer.TokenType.Equals, "Expected '='");
 
-        if (pos >= tokens.Count)
-            throw new Exception("Incomplete variable declaration");
+        if (Match(Lexer.TokenType.Equals))
+        {
+            if (pos >= tokens.Count)
+                throw new Exception("Incomplete variable declaration");
+            values = ParseList(ParseExpression);
+        }
 
-        List<ExprNode> values = ParseList(ParseExpression);
+        // values = ParseList(ParseExpression);
 
         return new LocalDeclaration(names, values);
     }
