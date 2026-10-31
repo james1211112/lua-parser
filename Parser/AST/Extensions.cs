@@ -16,7 +16,7 @@ public static class Extensions
                 Literal.Number =>
                     Convert.ToString(c.Value, CultureInfo.InvariantCulture)
                     ?? throw new Exception("invalid number"),
-
+                Literal.Nil => "nil",
                 _ => throw new Exception("unknown literal")
             },
 

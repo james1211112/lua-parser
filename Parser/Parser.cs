@@ -1,9 +1,10 @@
 using Parser.AST;
 using System;
+using System.Globalization;
 namespace Parser;
 
 using Token = global::Parser.Lexer.Token;
-public class Parser 
+public class Parser
 {
     private List<Token> tokens = new();
     private int pos = 0;
@@ -19,13 +20,22 @@ public class Parser
         }
         throw new Exception($"unexpected token: {token.Value}");
     }
+
+    private object ParseNumber(string value)
+    {
+        if (value.Contains('.') || value.Contains('e', StringComparison.OrdinalIgnoreCase))
+            return double.Parse(value, CultureInfo.InvariantCulture);
+
+        return long.Parse(value, CultureInfo.InvariantCulture);
+    }
+
     private ConstantNode ParseConstant(Token token)
     {
         return token.Type switch
         {
             Lexer.TokenType.Number =>
                 new ConstantNode(
-                    int.Parse(token.Value),
+                    ParseNumber(token.Value), // was using long.parse, but that doesnt support decimals, so we gonna use this method instead :)
                     Literal.Number
                 ),
 
@@ -40,6 +50,11 @@ public class Parser
                     bool.Parse(token.Value),
                     Literal.Boolean
                 ),
+            Lexer.TokenType.Nil =>
+                new ConstantNode(
+                    null,
+                    Literal.Nil
+                ),
 
             _ => throw new Exception("expected a constant")
         };
@@ -50,10 +65,10 @@ public class Parser
     - support local declarations with no supplied value e.g: `local a`
     - support global variables
     */
-    private ExprNode ParseVariable(List<Token> tokens) 
+    private ExprNode ParseVariable(List<Token> tokens)
     {
         pos++;
-        if (pos + 2 >= tokens.Count) 
+        if (pos + 2 >= tokens.Count)
             throw new Exception("Incomplete variable declaration");
 
         if (tokens[pos].Type != Lexer.TokenType.Identifier)

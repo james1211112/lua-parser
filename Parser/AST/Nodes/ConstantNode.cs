@@ -4,6 +4,7 @@ public enum Literal
 {
     Number,
     String,
-    Boolean
+    Boolean,
+    Nil
 }
-public record ConstantNode(object Value, Literal Kind) : ExprNode;
+public record ConstantNode(object? Value, Literal Kind) : ExprNode;

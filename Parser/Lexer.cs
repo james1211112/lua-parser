@@ -12,6 +12,7 @@ public class Lexer
         Number,
         String,
         Boolean,
+        Nil,
         Comma,
         // Semicolon
     }
@@ -42,16 +43,16 @@ public class Lexer
                 continue;
             }
 
-                if (c == '=')
-                {
-                    tokens.Add(new Token(TokenType.Equals, "="));
-                    i++;
-                    continue;
-                }
-            if (char.IsLetter(c))
+            if (c == '=')
+            {
+                tokens.Add(new Token(TokenType.Equals, "="));
+                i++;
+                continue;
+            }
+            if (char.IsLetter(c) || c == '_')                 // supported variables starting with _
             {
                 int start = i;
-                while (i < input.Length && char.IsLetter(input[i]))
+                while (i < input.Length && (char.IsLetterOrDigit(input[i]) || input[i] == '_')) // fixed it breaking on variable names with numbers in them
                 {
                     i++;
 
@@ -65,6 +66,11 @@ public class Lexer
                 if (value == "true" || value == "false")
                 {
                     tokens.Add(new Token(TokenType.Boolean, value));
+                    continue;
+                }
+                if (value == "nil")
+                {
+                    tokens.Add(new Token(TokenType.Nil, value));
                     continue;
                 }
                 // if (value == "--")
@@ -85,7 +91,7 @@ public class Lexer
             if (char.IsDigit(c))
             {
                 int start = i;
-                while (i < input.Length && char.IsDigit(input[i]))
+                while (i < input.Length && (char.IsDigit(input[i]) || input[i] == '.')) // decimal support
                 {
                     i++;
                 }

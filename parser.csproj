@@ -10,4 +10,8 @@
     <Compile Remove="Tests/**/*.cs" />
     <Compile Remove="Parser/Tests/**/*.cs" />
 </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Tests/**/*.cs" />
+    <Compile Remove="Playground/**/*.cs" />
+</ItemGroup>
 </Project>
