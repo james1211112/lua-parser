@@ -14,6 +14,38 @@ public partial class Parser
         return long.Parse(value, CultureInfo.InvariantCulture);
     }
 
+    private ExprNode ParseValue()
+    {
+        Token token = Advance();
+
+        if (token.Type == Lexer.TokenType.Identifier)
+            return new IdentifierNode(token.Value);
+
+        return ParseConstant(token);
+    }
+
+      private ExprNode ParseExpression()
+    {
+        ExprNode left = ParseValue();
+
+        if (Peek()?.Type == Lexer.TokenType.Operator)
+        {
+            Token op = Advance();
+            ExprNode right = ParseValue();
+            return new BinaryExpressionNode(left, op.Value, right);
+        }
+
+        return left;
+    }
+    
+
+    private IdentifierNode ParseIdentifier() // parse Identifier
+    {
+        Token token = Expect(Lexer.TokenType.Identifier, "Expected identifier");
+
+        return new IdentifierNode(token.Value);
+    }
+
     private ConstantNode ParseConstant(Token token)
     {
         return token.Type switch

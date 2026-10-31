@@ -17,9 +17,9 @@ public class ParserTests
         var ast = Parse("local a = 10");
 
         var local = Assert.IsType<LocalDeclaration>(Assert.Single(ast));
-        var value = Assert.IsType<ConstantNode>(local.Value);
+        var value = Assert.IsType<ConstantNode>(local.Values[0]);
 
-        Assert.Equal("a", local.Name.Name);
+        Assert.Equal("a", local.Names[0].Name);
         Assert.Equal(10L, value.Value);
         Assert.Equal(Literal.Number, value.Kind);
     }
@@ -30,7 +30,7 @@ public class ParserTests
         var ast = Parse("local a = \"hello world\"");
 
         var local = Assert.IsType<LocalDeclaration>(Assert.Single(ast));
-        var value = Assert.IsType<ConstantNode>(local.Value);
+        var value = Assert.IsType<ConstantNode>(local.Values[0]);
 
         Assert.Equal("hello world", value.Value);
         Assert.Equal(Literal.String, value.Kind);
@@ -44,7 +44,7 @@ public class ParserTests
         var ast = Parse($"local a = {input}");
 
         var local = Assert.IsType<LocalDeclaration>(Assert.Single(ast));
-        var value = Assert.IsType<ConstantNode>(local.Value);
+        var value = Assert.IsType<ConstantNode>(local.Values[0]);
 
         Assert.Equal(expected, value.Value);
         Assert.Equal(Literal.Boolean, value.Kind);
@@ -56,9 +56,9 @@ public class ParserTests
         var ast = Parse("local b = a");
 
         var local = Assert.IsType<LocalDeclaration>(Assert.Single(ast));
-        var value = Assert.IsType<IdentifierNode>(local.Value);
+        var value = Assert.IsType<IdentifierNode>(local.Values[0]);
 
-        Assert.Equal("b", local.Name.Name);
+        Assert.Equal("b", local.Names[0].Name);
         Assert.Equal("a", value.Name);
     }
 
@@ -72,9 +72,143 @@ public class ParserTests
         var first = Assert.IsType<LocalDeclaration>(ast[0]);
         var second = Assert.IsType<LocalDeclaration>(ast[1]);
 
-        Assert.Equal("a", first.Name.Name);
-        Assert.Equal("b", second.Name.Name);
-        Assert.IsType<IdentifierNode>(second.Value);
+        Assert.Equal("a", first.Names[0].Name);
+        Assert.Equal("b", second.Names[0].Name);
+        Assert.IsType<IdentifierNode>(second.Values[0]);
+    }
+
+    [Fact]
+    public void MultipleLocalVariables()
+    {
+        var ast = Parse("local a, b, c = 10, 20, 30");
+
+        var local = Assert.IsType<LocalDeclaration>(Assert.Single(ast));
+
+        Assert.Equal(3, local.Names.Count);
+        Assert.Equal(3, local.Values.Count);
+
+        Assert.Equal("a", local.Names[0].Name);
+        Assert.Equal("b", local.Names[1].Name);
+        Assert.Equal("c", local.Names[2].Name);
+
+        Assert.Equal(10L, Assert.IsType<ConstantNode>(local.Values[0]).Value);
+        Assert.Equal(20L, Assert.IsType<ConstantNode>(local.Values[1]).Value);
+        Assert.Equal(30L, Assert.IsType<ConstantNode>(local.Values[2]).Value);
+    }
+
+    [Fact]
+    public void MultipleLocalVariableReferences()
+    {
+        var ast = Parse("local a, b = 10, a");
+
+        var local = Assert.IsType<LocalDeclaration>(Assert.Single(ast));
+
+        Assert.Equal(2, local.Names.Count);
+        Assert.Equal(2, local.Values.Count);
+
+        Assert.Equal(10L, Assert.IsType<ConstantNode>(local.Values[0]).Value);
+        Assert.Equal("a", Assert.IsType<IdentifierNode>(local.Values[1]).Name);
+    }
+
+    [Fact]
+    public void NilLiteral()
+    {
+        var ast = Parse("local a = nil");
+
+        var local = Assert.IsType<LocalDeclaration>(Assert.Single(ast));
+        var value = Assert.IsType<ConstantNode>(local.Values[0]);
+
+        Assert.Null(value.Value);
+        Assert.Equal(Literal.Nil, value.Kind);
+    }
+
+    [Fact]
+    public void DecimalLiteral()
+    {
+        var ast = Parse("local a = 10.5");
+
+        var local = Assert.IsType<LocalDeclaration>(Assert.Single(ast));
+        var value = Assert.IsType<ConstantNode>(local.Values[0]);
+
+        Assert.Equal(10.5, value.Value);
+        Assert.Equal(Literal.Number, value.Kind);
+    }
+
+    [Theory]
+    [InlineData("+")]
+    [InlineData("-")]
+    [InlineData("*")]
+    [InlineData("/")]
+    public void MathExpression(string op)
+    {
+        var ast = Parse($"local a = 10 {op} 5");
+
+        var local = Assert.IsType<LocalDeclaration>(Assert.Single(ast));
+        var expression = Assert.IsType<BinaryExpressionNode>(local.Values[0]);
+
+        Assert.Equal(op, expression.Operator);
+
+        var left = Assert.IsType<ConstantNode>(expression.Left);
+        var right = Assert.IsType<ConstantNode>(expression.Right);
+
+        Assert.Equal(10L, left.Value);
+        Assert.Equal(5L, right.Value);
+    }
+
+    [Fact]
+    public void MathExpressionWithVariable()
+    {
+        var ast = Parse("local a = b + 10");
+
+        var local = Assert.IsType<LocalDeclaration>(Assert.Single(ast));
+        var expression = Assert.IsType<BinaryExpressionNode>(local.Values[0]);
+
+        Assert.Equal("+", expression.Operator);
+        Assert.Equal("b", Assert.IsType<IdentifierNode>(expression.Left).Name);
+        Assert.Equal(10L, Assert.IsType<ConstantNode>(expression.Right).Value);
+    }
+
+    [Fact]
+    public void VariableAssignment()
+    {
+        var ast = Parse("a = 20");
+
+        var assignment = Assert.IsType<AssignmentNode>(Assert.Single(ast));
+        var value = Assert.IsType<ConstantNode>(assignment.Value);
+
+        Assert.Equal("a", assignment.Name.Name);
+        Assert.Equal(20L, value.Value);
+    }
+
+    [Fact]
+    public void VariableReassignment()
+    {
+        var ast = Parse("local a = 10\na = 20");
+
+        Assert.Equal(2, ast.Count);
+
+        Assert.IsType<LocalDeclaration>(ast[0]);
+
+        var assignment = Assert.IsType<AssignmentNode>(ast[1]);
+
+        Assert.Equal("a", assignment.Name.Name);
+        Assert.Equal(20L, Assert.IsType<ConstantNode>(assignment.Value).Value);
+    }
+
+    [Theory]
+    [InlineData("+=")]
+    [InlineData("-=")]
+    [InlineData("*=")]
+    [InlineData("/=")]
+    public void CompoundAssignment(string op)
+    {
+        var ast = Parse($"a {op} 5");
+
+        var assignment = Assert.IsType<CompoundAssignmentNode>(Assert.Single(ast));
+
+        Assert.Equal("a", assignment.Name.Name);
+        Assert.Equal(op, assignment.Operator);
+        Assert.Equal(5L, Assert.IsType<ConstantNode>(assignment.Value).Value);
     }
 
     [Fact]

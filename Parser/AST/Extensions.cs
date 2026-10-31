@@ -7,7 +7,8 @@ public static class Extensions
     {
         return node switch
         {
-            LocalDeclaration local => $"local {local.Name.ToFullString()} = {local.Value.ToFullString()}", 
+            LocalDeclaration l =>
+    $"local {string.Join(", ", l.Names.Select(n => n.ToFullString()))} = {string.Join(", ", l.Values.Select(v => v.ToFullString()))}", // support multiple local variable declarations 
             IdentifierNode id => id.Name,
             ConstantNode c => c.Kind switch
             {
@@ -20,6 +21,9 @@ public static class Extensions
                 _ => throw new Exception("unknown literal")
             },
 
+            BinaryExpressionNode b => $"{b.Left.ToFullString()} {b.Operator} {b.Right.ToFullString()}",
+            AssignmentNode a => $"{a.Name.ToFullString()} = {a.Value.ToFullString()}",
+            CompoundAssignmentNode c => $"{c.Name.ToFullString()} {c.Operator} {c.Value.ToFullString()}", // compound operators!!!!!
             _ => throw new Exception("unknown node type")
         };
     }

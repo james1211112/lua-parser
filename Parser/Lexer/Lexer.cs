@@ -14,6 +14,7 @@ public partial class Lexer
         Boolean,
         Nil,
         Comma,
+        Operator
         // Semicolon
     }
 
@@ -72,6 +73,12 @@ public partial class Lexer
             {
                 tokens.Add(new Token(TokenType.Comma, ",")); // still no support for multiple local decl on same line
                 i++;
+                continue;
+            }
+
+            if (c is '+' or '-' or '*' or '/') 
+            {
+                Operators(input, ref i, tokens);
                 continue;
             }
             throw new Exception($"unexpected character: {c}");

@@ -1,6 +1,6 @@
 namespace Parser.AST;
 
 public record LocalDeclaration(
-    IdentifierNode Name,
-    ExprNode? Value
+    List<IdentifierNode> Names,
+    List<ExprNode> Values
 ) : ExprNode;
