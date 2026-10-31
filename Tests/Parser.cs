@@ -20,7 +20,7 @@ public class ParserTests
         var value = Assert.IsType<ConstantNode>(local.Value);
 
         Assert.Equal("a", local.Name.Name);
-        Assert.Equal(10, value.Value);
+        Assert.Equal(10L, value.Value);
         Assert.Equal(Literal.Number, value.Kind);
     }
 
