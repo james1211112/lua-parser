@@ -2,6 +2,31 @@ namespace Parser;
 
 public partial class Lexer
 {
+
+    private static readonly HashSet<string> Keywords = new() // thank you claude 
+{
+    "and",
+    "break",
+    "do",
+    "else",
+    "elseif",
+    "end",
+    "false",
+    "for",
+    "function",
+    "if",
+    "in",
+    "local",
+    "nil",
+    "not",
+    "or",
+    "repeat",
+    "return",
+    "then",
+    "true",
+    "until",
+    "while"
+};
     private Token Identifier(string input, ref int i)
     {
         int start = i;
@@ -11,10 +36,7 @@ public partial class Lexer
 
         }
         string value = input[start..i];
-        if (value == "local")
-        {
-            return new Token(TokenType.Keyword, value);
-        }
+
         if (value == "true" || value == "false")
         {
             return new Token(TokenType.Boolean, value);
@@ -22,6 +44,10 @@ public partial class Lexer
         if (value == "nil")
         {
             return new Token(TokenType.Nil, value);
+        }
+        if (Keywords.Contains(value)) // has to BE after it checks for true, false, and nil
+        {
+            return new Token(TokenType.Keyword, value);
         }
         return new Token(TokenType.Identifier, value);
     }

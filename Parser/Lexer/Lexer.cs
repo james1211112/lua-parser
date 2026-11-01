@@ -14,7 +14,9 @@ public partial class Lexer
         Boolean,
         Nil,
         Comma,
-        Operator
+        Operator,
+        Rparen,
+        Lparen
         // Semicolon
     }
 
@@ -62,7 +64,18 @@ public partial class Lexer
                 tokens.Add(String(input, ref i));
                 continue;
             }
-
+            if (c == '(')
+            {
+                tokens.Add(new Token(TokenType.Lparen, "("));
+                i++;
+                continue;
+            }
+            if (c == ')')
+            {
+                tokens.Add(new Token(TokenType.Rparen, ")"));
+                i++;
+                continue;
+            }
             if (c == ';')
             {
                 i++;

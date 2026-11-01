@@ -23,6 +23,7 @@ public static class Extensions
             BinaryExpressionNode b => $"{b.Left.ToFullString()} {b.Operator} {b.Right.ToFullString()}",
             AssignmentNode a => $"{a.Name.ToFullString()} = {a.Value.ToFullString()}",
             CompoundAssignmentNode c => $"{c.Name.ToFullString()} {c.Operator} {c.Value.ToFullString()}", // compound operators!!!!!
+            FunctionDeclarationNode f =>  $"{(f.IsLocal ? "local " : "")}function {f.Name.ToFullString()}" + $"({string.Join(", ", f.Parameters.Select(p => p.ToFullString()))})\n" + $"{string.Join("\n", f.Body.Select(b => b.ToFullString()))}" +$"{(f.Body.Count > 0 ? "\n" : "")}end",
             _ => throw new Exception("unknown node type")
         };
     }

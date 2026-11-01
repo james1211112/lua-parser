@@ -5,17 +5,34 @@ namespace Parser;
 using Token = global::Parser.Lexer.Token;
 public partial class Parser
 {
-    private ExprNode ParseStatement() 
+    private ExprNode ParseStatement()
     {
         Token token = Peek()!; // using new helper now
         if (token.Type == Lexer.TokenType.Keyword)
         {
             if (token.Value == "local")
             {
+                Advance();
+
+                if (Peek()?.Value == "function")
+                {
+                    Advance();
+                    return ParseFunction(true); // omg.
+                }
+
+                pos--;
+
                 return ParseVariable();
             }
+
+            if (token.Value == "function")
+            {
+                Advance();
+                return ParseFunction(false);
+            }
+
         }
-        if (token.Type == Lexer.TokenType.Identifier)
+        if (token.Type == Lexer.TokenType.Identifier) // accidentally had this in the if block that checked if it was a keyword, not a identifier...
         {
             return ParseAssignment();
         }

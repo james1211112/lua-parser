@@ -50,6 +50,37 @@ public class ParserTests
         Assert.Equal(Literal.Boolean, value.Kind);
     }
 
+    [Theory]
+    [InlineData("function add() end", false)]
+    [InlineData("local function add() end", true)]
+    public void FunctionDeclaration(string input, bool isLocal)
+    {
+        var ast = Parse(input);
+
+        var function = Assert.IsType<FunctionDeclarationNode>(
+            Assert.Single(ast)
+        );
+
+        Assert.Equal("add", function.Name.Name);
+        Assert.Equal(isLocal, function.IsLocal);
+        Assert.Empty(function.Parameters);
+        Assert.Empty(function.Body);
+    }
+
+    [Fact]
+    public void FunctionParameters()
+    {
+        var ast = Parse("function add(a, b) end");
+
+        var function = Assert.IsType<FunctionDeclarationNode>(
+            Assert.Single(ast)
+        );
+
+        Assert.Equal(2, function.Parameters.Count);
+        Assert.Equal("a", function.Parameters[0].Name);
+        Assert.Equal("b", function.Parameters[1].Name);
+    }
+
     [Fact]
     public void VariableReference()
     {

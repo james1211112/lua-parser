@@ -44,6 +44,35 @@ public class LexerTests
         Assert.Equal("a", tokens[3].Value);
     }
 
+    [Theory]
+    [InlineData("function add(a, b) end", false)]
+    [InlineData("local function add(a, b) end", true)]
+    public void FunctionDeclaration(string input, bool isLocal)
+    {
+        var tokens = new Lexer().Tokenize(input);
+
+        int i = 0;
+
+        if (isLocal)
+        {
+            Assert.Equal("local", tokens[i].Value);
+            Assert.Equal(Lexer.TokenType.Keyword, tokens[i].Type);
+            i++;
+        }
+
+        Assert.Equal("function", tokens[i++].Value);
+        Assert.Equal("add", tokens[i++].Value);
+
+        Assert.Equal(Lexer.TokenType.Lparen, tokens[i++].Type);
+        Assert.Equal("a", tokens[i++].Value);
+        Assert.Equal(Lexer.TokenType.Comma, tokens[i++].Type);
+        Assert.Equal("b", tokens[i++].Value);
+        Assert.Equal(Lexer.TokenType.Rparen, tokens[i++].Type);
+
+        Assert.Equal("end", tokens[i++].Value);
+        Assert.Equal(i, tokens.Count);
+    }
+
     [Fact]
     public void MultipleDeclarations()
     {
@@ -54,7 +83,7 @@ public class LexerTests
         Assert.Equal(8, tokens.Count);
     }
 
-    
+
 
     [Fact]
     public void Comma()
