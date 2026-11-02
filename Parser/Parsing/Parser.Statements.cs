@@ -10,6 +10,16 @@ public partial class Parser
         Token token = Peek()!; // using new helper now
         if (token.Type == Lexer.TokenType.Keyword)
         {
+            if (token.Value == "if")
+            {
+                Advance(); 
+                return ParseIf();
+            }
+            if (token.Value == "while")
+            {
+                Advance();
+                return ParseWhile();
+            }
             if (token.Value == "local")
             {
                 Advance();

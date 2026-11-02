@@ -37,6 +37,21 @@ public partial class Parser // this file will make my life so much easier
         return Advance();
     }
 
+    private Token ExpectKeyword(string keyword) 
+    {
+        Token? token = Peek();
+
+        if (token?.Type != Lexer.TokenType.Keyword ||
+            token.Value != keyword)
+        {
+            throw new Exception(
+                $"expected keyword '{keyword}', got '{token?.Value ?? "EOF"}'"
+            );
+        }
+
+        return Advance();
+    }
+
     private List<T> ParseList<T>(Func<T> parseItem)
     {
         var items = new List<T> { parseItem() };

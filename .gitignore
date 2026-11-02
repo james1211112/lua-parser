@@ -17,7 +17,7 @@ Playground/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
-
+input.lua
 # Mono auto generated files
 mono_crash.*
 

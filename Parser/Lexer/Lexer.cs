@@ -16,7 +16,7 @@ public partial class Lexer
         Comma,
         Operator,
         Rparen,
-        Lparen
+        Lparen,
         // Semicolon
     }
 
@@ -44,6 +44,12 @@ public partial class Lexer
 
             if (c == '=')
             {
+                if (i + 1 < input.Length && input[i + 1] == '=')
+                {
+                    tokens.Add(new Token(TokenType.Operator, "=="));
+                    i += 2;
+                    continue;
+                }
                 tokens.Add(new Token(TokenType.Equals, "="));
                 i++;
                 continue;
@@ -85,6 +91,30 @@ public partial class Lexer
             if (c == ',')
             {
                 tokens.Add(new Token(TokenType.Comma, ",")); // still no support for multiple local decl on same line
+                i++;
+                continue;
+            }
+            if (c == '>')
+            {
+                if (i + 1 < input.Length && input[i + 1] == '=')  // check if it's >= instead of >
+                {
+                    tokens.Add(new Token(TokenType.Operator, ">="));
+                    i += 2;
+                    continue;
+                }
+                tokens.Add(new Token(TokenType.Operator, ">"));
+                i++;
+                continue;
+            }
+            if (c == '<')
+            {
+                if (i + 1 < input.Length && input[i + 1] == '=')
+                {
+                    tokens.Add(new Token(TokenType.Operator, "<="));
+                    i += 2;
+                    continue;
+                }
+                tokens.Add(new Token(TokenType.Operator, "<"));
                 i++;
                 continue;
             }
