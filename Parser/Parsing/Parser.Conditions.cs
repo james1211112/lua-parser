@@ -61,6 +61,22 @@ public partial class Parser
         );
 
     }
+
+    private ExprNode ParseRepeat()
+    {
+        List<ExprNode> body = new();
+
+        while (Peek() is not null && Peek()!.Value != "until")
+        {
+            body.Add(ParseStatement()); // parse statements until we reach until
+        }
+
+        ExpectKeyword("until");
+
+        ExprNode condition = ParseExpression(); // condition comes after the body (basically the opposite of a while)
+
+        return new RepeatNode(body, condition);
+    }
     private ExprNode ParseWhile()
     {
         ExprNode Condition = ParseExpression(); // 🤤

@@ -20,6 +20,11 @@ public partial class Parser
                 Advance();
                 return ParseWhile();
             }
+            if (token.Value == "repeat")
+            {
+                Advance(); 
+                return ParseRepeat();
+            }
             if (token.Value == "local")
             {
                 Advance();
@@ -49,7 +54,7 @@ public partial class Parser
                 ExprNode expression = ParseExpression();
                 if (expression is not FunctionCallNode)
                     throw new Exception("expected a function call");
-                    return expression;
+                return expression;
             }
             return ParseAssignment();
         }
@@ -80,7 +85,7 @@ public partial class Parser
         }
 
         // values = ParseList(ParseExpression);
-
+        // FIXME: parser accepts invalid syntax like local a = 1 += 1 in repeats and whiles, and probably in more places
         return new LocalDeclaration(names, values);
     }
     private ExprNode ParseAssignment()
