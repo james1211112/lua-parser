@@ -66,6 +66,131 @@ public class ParserTests
         Assert.Empty(function.Parameters);
         Assert.Empty(function.Body);
     }
+    [Fact]
+    public void RepeatLoop()
+    {
+        var ast = Parse("""
+        repeat
+            a = 10
+        until a == 10
+        """);
+
+        var repeat = Assert.IsType<RepeatNode>(Assert.Single(ast));
+
+        Assert.Single(repeat.Body);
+        Assert.IsType<AssignmentNode>(repeat.Body[0]);
+
+        var condition = Assert.IsType<BinaryExpressionNode>(repeat.Condition);
+
+        Assert.Equal("==", condition.Operator);
+    }
+
+    [Fact]
+    public void RepeatLoopWithMultipleStatements()
+    {
+        var ast = Parse("""
+        repeat
+            a = 1
+            b = 2
+        until a == b
+        """);
+
+        var repeat = Assert.IsType<RepeatNode>(Assert.Single(ast));
+
+        Assert.Equal(2, repeat.Body.Count);
+        Assert.All(repeat.Body, node => Assert.IsType<AssignmentNode>(node));
+    }
+
+    [Fact]
+    public void RepeatLoopWithoutUntil()
+    {
+        Assert.Throws<Exception>(() => Parse("""
+        repeat
+            a = 10
+        """));
+    }
+
+    [Fact]
+    public void RepeatNestedIf()
+    {
+        var ast = Parse("""
+        repeat
+            if a then
+                b = 10
+            end
+        until b == 10
+        """);
+
+        var repeat = Assert.IsType<RepeatNode>(Assert.Single(ast));
+
+        Assert.IsType<IfNode>(Assert.Single(repeat.Body));
+    }
+
+    [Fact]
+    public void FunctionCall()
+    {
+        var ast = Parse("print(a)");
+
+        var call = Assert.IsType<FunctionCallNode>(Assert.Single(ast));
+
+        Assert.Equal("print", Assert.IsType<IdentifierNode>(call.Function).Name);
+        Assert.Equal("a", Assert.IsType<IdentifierNode>(Assert.Single(call.Arguments)).Name);
+    }
+
+    [Fact]
+    public void FunctionCallWithArguments()
+    {
+        var ast = Parse("local result = add(10, 20)");
+
+        var local = Assert.IsType<LocalDeclaration>(Assert.Single(ast));
+        var call = Assert.IsType<FunctionCallNode>(Assert.Single(local.Values));
+
+        Assert.Equal("add", Assert.IsType<IdentifierNode>(call.Function).Name);
+        Assert.Equal(2, call.Arguments.Count);
+        Assert.Equal(10L, Assert.IsType<ConstantNode>(call.Arguments[0]).Value);
+        Assert.Equal(20L, Assert.IsType<ConstantNode>(call.Arguments[1]).Value);
+    }
+
+    [Fact]
+    public void EmptyFunctionCall()
+    {
+        var ast = Parse("print()");
+
+        var call = Assert.IsType<FunctionCallNode>(Assert.Single(ast));
+
+        Assert.Empty(call.Arguments);
+    }
+
+    [Fact]
+    public void FunctionCallInsideIf()
+    {
+        var ast = Parse("""
+        if a then
+            print(a)
+        end
+        """);
+
+        var ifNode = Assert.IsType<IfNode>(Assert.Single(ast));
+
+        var call = Assert.IsType<FunctionCallNode>(
+            Assert.Single(ifNode.Body)
+        );
+
+        Assert.Equal("print", Assert.IsType<IdentifierNode>(call.Function).Name);
+    }
+
+    [Fact]
+    public void NestedFunctionCall()
+    {
+        var ast = Parse("print(add(1, 2))");
+
+        var outer = Assert.IsType<FunctionCallNode>(Assert.Single(ast));
+        var inner = Assert.IsType<FunctionCallNode>(Assert.Single(outer.Arguments));
+
+        Assert.Equal("print", Assert.IsType<IdentifierNode>(outer.Function).Name);
+        Assert.Equal("add", Assert.IsType<IdentifierNode>(inner.Function).Name);
+        Assert.Equal(2, inner.Arguments.Count);
+    }
 
     [Fact]
     public void FunctionParameters()

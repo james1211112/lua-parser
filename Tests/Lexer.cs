@@ -92,6 +92,7 @@ public class LexerTests
 
         Assert.Equal(Lexer.TokenType.Comma, tokens[2].Type);
     }
+    
 
     [Fact]
     public void Comments()
