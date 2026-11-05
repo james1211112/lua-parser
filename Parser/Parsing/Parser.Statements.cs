@@ -12,7 +12,7 @@ public partial class Parser
         {
             if (token.Value == "if")
             {
-                Advance(); 
+                Advance();
                 return ParseIf();
             }
             if (token.Value == "while")
@@ -44,6 +44,13 @@ public partial class Parser
         }
         if (token.Type == Lexer.TokenType.Identifier) // accidentally had this in the if block that checked if it was a keyword, not a identifier...
         {
+            if (pos + 1 < tokens.Count && tokens[pos + 1].Type == Lexer.TokenType.Lparen)// check if it's a function call instead of a assignment 
+            {
+                ExprNode expression = ParseExpression();
+                if (expression is not FunctionCallNode)
+                    throw new Exception("expected a function call");
+                    return expression;
+            }
             return ParseAssignment();
         }
 

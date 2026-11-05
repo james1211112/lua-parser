@@ -19,12 +19,19 @@ public partial class Parser
         Token token = Advance();
 
         if (token.Type == Lexer.TokenType.Identifier)
-            return new IdentifierNode(token.Value);
+        {
+            ExprNode expression = new IdentifierNode(token.Value);
+            while (Peek()?.Type == Lexer.TokenType.Lparen) // support stuff like function()(2)
+            {
+                expression = ParseFunctionCall(expression);
+            }
+            return expression;
+        }
 
         return ParseConstant(token);
     }
 
-      private ExprNode ParseExpression()
+    private ExprNode ParseExpression()
     {
         ExprNode left = ParseValue();
 
@@ -37,7 +44,22 @@ public partial class Parser
 
         return left;
     }
-    
+
+    private ExprNode ParseFunctionCall(ExprNode callee)
+    {
+        Expect(Lexer.TokenType.Lparen);
+
+        List<ExprNode> arguments = new();
+
+        if (Peek()?.Type != Lexer.TokenType.Rparen) // dont parse args if there isnt any
+        {
+            arguments = ParseList(ParseExpression);
+        }
+
+        Expect(Lexer.TokenType.Rparen);
+        return new FunctionCallNode(callee, arguments);
+    }
+
 
     private IdentifierNode ParseIdentifier() // parse Identifier
     {
